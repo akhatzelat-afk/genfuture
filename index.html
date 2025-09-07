@@ -1,55 +1,25 @@
+
 <!DOCTYPE html>
 <html>
 <head>
     <meta charset="utf-8">
     <title>Магический Оракул</title>
     <style>
-        body { 
-            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
-            color: #e0d0b0; font-family: 'Times New Roman', serif; 
-            text-align: center; margin: 0; padding: 20px;
-            min-height: 100vh; display: flex; justify-content: center; 
-            align-items: center; text-shadow: 1px 1px 2px #000;
-        }
-        .oracle {
-            background: rgba(0, 0, 0, 0.7); padding: 30px; 
-            border-radius: 20px; border: 2px solid #8b6b4d;
-            box-shadow: 0 0 30px rgba(139, 107, 77, 0.4);
-            max-width: 600px; width: 90%;
-        }
-        h1 {
-            color: #f4d47f; margin: 0 0 25px 0; font-size: 28px;
-            font-variant: small-caps; letter-spacing: 2px;
-            text-shadow: 0 0 10px #f4d47f;
-        }
-        #prediction {
-            font-size: 20px; margin: 25px 0; min-height: 120px;
-            display: flex; align-items: center; justify-content: center;
-            font-style: italic; line-height: 1.6; padding: 20px;
-            background: rgba(0, 0, 0, 0.5); border-radius: 15px;
-            border: 1px solid #6b5b3c; color: #e8e0c0;
-            text-shadow: 0 0 5px rgba(244, 212, 127, 0.3);
-        }
-        .footer {
-            font-size: 14px; color: #b8a070; font-style: italic;
-            margin-top: 20px; opacity: 0.8;
-        }
-        .info {
-            font-size: 12px; color: #8b6b4d; margin-top: 10px;
-        }
+        body { background: transparent !important; margin: 0; padding: 0; font-family: 'Times New Roman', serif; }
+        .oracle { background: rgba(0, 0, 0, 0.85); padding: 20px; border-radius: 15px; border: 2px solid #8b6b4d; color: #e0d0b0; text-align: center; }
+        /* остальные стили */
     </style>
 </head>
 <body>
     <div class="oracle">
-        <h1>🧙‍♂️ МАГИЧЕСКИЙ ОРАКУЛ 🧙‍♂️</h1>
+        <h1>🧙‍♂️ МАГИЧЕСКИЙ ОРАКУЛ</h1>
         <div id="prediction">Загрузка предсказания...</div>
-        <div id="dateInfo" class="info"></div>
         <div class="footer">"Судьба переменчива, как лунный свет на воде..."</div>
     </div>
 
     <script>
-        const predictions = [
-            "Драконы удачи пролетят над вашим замком сегодня 🐉",
+        const predictions = [ 
+"Драконы удачи пролетят над вашим замком сегодня 🐉",
             "Эльфы удачи пошлют вам фиалковый дождь из лепестков 🌸",
             "Феникс возрождения расправит крылья над вашей судьбой 🔥",
             "Гоблин украдёт ваши носки, но оставит золото 🧦",
@@ -109,36 +79,32 @@
             "Врата ада откроются там, где вы ступите 🔥",
             "Лунная фея осыплет вас звёздной пылью процветания 🌙",
             "Заклинатель снов подарит вам вещее видение 💤"
-        ];
+];
 
-        function getDailyPrediction() {
+        function getStablePrediction() {
             const today = new Date().toDateString();
+            const userAgent = navigator.userAgent;
             
-            // Создаем уникальный ключ для каждого пользователя на этот день
-            const userKey = today + ':' + Math.floor(Math.random() * 1000000);
+            // Создаем стабильный ключ на основе даты и User-Agent
+            const dailyKey = today + userAgent;
             
-            // Простой хэш для получения индекса
             let hash = 0;
-            for (let i = 0; i < userKey.length; i++) {
-                hash = ((hash << 5) - hash) + userKey.charCodeAt(i);
+            for (let i = 0; i < dailyKey.length; i++) {
+                hash = ((hash << 5) - hash) + dailyKey.charCodeAt(i);
                 hash = hash & hash;
             }
             
-            const predictionIndex = Math.abs(hash) % predictions.length;
-            return predictions[predictionIndex];
+            return Math.abs(hash) % predictions.length;
         }
 
         function updatePrediction() {
-            const today = new Date();
-            const prediction = getDailyPrediction();
-            
-            document.getElementById('prediction').textContent = prediction;
-            document.getElementById('dateInfo').textContent = 
-                `Ваше предсказание на ${today.toLocaleDateString()} • Действует до полуночи`;
+            const predictionIndex = getStablePrediction();
+            document.getElementById('prediction').textContent = predictions[predictionIndex];
         }
 
-        // Обновляем при загрузке
         updatePrediction();
     </script>
 </body>
 </html>
+
+
