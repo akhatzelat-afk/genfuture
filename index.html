@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Магический Оракул</title>
+    <style>
+        body { 
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white; font-family: Arial; text-align: center; padding: 20px;
+        }
+        .oracle {
+            background: rgba(255,255,255,0.1); padding: 30px; border-radius: 15px;
+            margin: 20px auto; max-width: 500px; backdrop-filter: blur(10px);
+        }
+        button {
+            background: #ff6b6b; color: white; border: none; padding: 15px 30px;
+            border-radius: 25px; font-size: 18px; cursor: pointer; margin: 20px;
+            transition: transform 0.3s;
+        }
+        button:hover { transform: scale(1.05); }
+    </style>
+</head>
+<body>
+    <div class="oracle">
+        <h1>🧙‍♂️ МАГИЧЕСКИЙ ОРАКУЛ</h1>
+        <div id="prediction" style="font-size: 20px; margin: 20px 0; min-height: 60px;">
+            Нажмите кнопку для предсказания...
+        </div>
+        <button onclick="getPrediction()">🎯 Получить предсказание</button>
+    </div>
+
+    <script>
+        const predictions = [
+            "Драконы удачи пролетят над вашим замком сегодня 🐉",
+            "Эльфы пошлют вам золотой дождь из лепестков 🌸",
+            "Феникс возрождения расправит крылья над вашей судьбой 🔥",
+            "Гоблин украдёт ваши носки, но оставит золото 🧦",
+            "Вампир укусит вас и получит несварение от кофе ☕",
+            "Русалки споют вам песню, приносящую богатство 🧜‍♀️",
+            // Добавьте остальные 54 предсказания
+        ];
+
+        function getPrediction() {
+            const randomIndex = Math.floor(Math.random() * predictions.length);
+            document.getElementById('prediction').innerHTML = predictions[randomIndex];
+        }
+    </script>
+</body>
+</html>
