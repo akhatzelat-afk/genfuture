@@ -238,24 +238,24 @@
             "В следующий раз, когда ты скажешь 'я готов', помни — магия любит посмеяться над твоими ожиданиями."
         ];
 
-       // СУПЕР-СТАБИЛЬНЫЙ идентификатор пользователя
-function getSuperStableUserId() {
-    // Пробуем получить хотя бы что-то постоянное из браузера
-    let userId = localStorage.getItem('oracleMagicId');
+       // УНИВЕРСАЛЬНЫЙ СТАБИЛЬНЫЙ ИДЕНТИФИКАТОР
+function getUniversalStableId() {
+    // Пробуем получить хоть что-то постоянное
+    let stableId = localStorage.getItem('universalOracleId');
     
-    if (!userId) {
-        // Создаем сложный идентификатор из всего, что можем получить
+    if (!stableId) {
+        // Создаем сложный ID из всего доступного
         const components = [
-            navigator.userAgent,
             navigator.language,
-            navigator.hardwareConcurrency || 'unknown',
-            navigator.deviceMemory || 'unknown',
             new Date().getTimezoneOffset(),
             screen.width + 'x' + screen.height,
-            Math.random().toString(36).substr(2, 9)
+            navigator.hardwareConcurrency || 'unknown',
+            navigator.deviceMemory || 'unknown',
+            performance.timeOrigin || 'unknown',
+            Math.random().toString(36).substr(2, 12)
         ];
         
-        // Создаем хэш из всех компонентов
+        // Генерируем хэш
         let hash = 0;
         for (let i = 0; i < components.length; i++) {
             const str = components[i].toString();
@@ -265,38 +265,41 @@ function getSuperStableUserId() {
             }
         }
         
-        userId = 'user-' + Math.abs(hash).toString(36);
-        localStorage.setItem('oracleMagicId', userId);
-    }
-    
-    return userId;
-}
-
-// Функция для получения "отпечатка" браузера
-function getBrowserFingerprint() {
-    try {
-        const canvas = document.createElement('canvas');
-        const ctx = canvas.getContext('2d');
-        ctx.textBaseline = 'top';
-        ctx.font = '14px Arial';
-        ctx.fillText('ORACLE_MAGIC_FINGERPRINT', 2, 2);
-        return canvas.toDataURL();
-    } catch (e) {
-        return 'fingerprint-failed';
-    }
-}
-
-// ОСНОВНАЯ ФУНКЦИЯ (полностью отказались от IP)
-async function getStablePredictionIndex() {
-    const today = new Date().toDateString();
-    
-    try {
-        // Используем СУПЕР-СТАБИЛЬНЫЙ идентификатор
-        const stableId = getSuperStableUserId();
-        const fingerprint = getBrowserFingerprint();
+        stableId = 'magic-user-' + Math.abs(hash).toString(36);
+        localStorage.setItem('universalOracleId', stableId);
         
-        // Создаем уникальный ключ из всего, что можем
-        const uniqueKey = today + stableId + fingerprint + navigator.language;
+        // Дублируем в sessionStorage на всякий случай
+        sessionStorage.setItem('sessionOracleId', stableId);
+    }
+    
+    return stableId;
+}
+
+// Функция для определения типа браузера
+function getBrowserType() {
+    const ua = navigator.userAgent;
+    if (ua.includes('Opera') || ua.includes('OPR/')) return 'opera';
+    if (ua.includes('Firefox')) return 'firefox';
+    if (ua.includes('Chrome')) return 'chrome';
+    if (ua.includes('Safari')) return 'safari';
+    if (ua.includes('Edg')) return 'edge';
+    return 'unknown';
+}
+
+// ОСНОВНАЯ ФУНКЦИЯ ДЛЯ ЛЮБОГО БРАУЗЕРА
+async function getUniversalPredictionIndex() {
+    const today = new Date().toDateString();
+    const browserType = getBrowserType();
+    
+    // Для особых случаев
+    if (browserType === 'opera' || browserType === 'firefox') {
+        console.log('Обнаружен приватный браузер:', browserType);
+    }
+    
+    try {
+        // Всегда используем наш универсальный ID
+        const stableId = getUniversalStableId();
+        const uniqueKey = today + stableId + browserType;
         
         // Генерируем хэш
         let hash = 0;
@@ -308,18 +311,27 @@ async function getStablePredictionIndex() {
         return Math.abs(hash) % predictions.length;
         
     } catch (error) {
-        console.log('Используем ultra-fallback метод');
-        // Extreme fallback
-        const timeSeed = new Date().getHours() * 60 + new Date().getMinutes();
-        return (timeSeed + Math.floor(Math.random() * 1000)) % predictions.length;
+        console.log('Используем универсальный fallback');
+        // Максимально простой fallback
+        const now = new Date();
+        const timeSeed = now.getHours() * 3600 + now.getMinutes() * 60 + now.getSeconds();
+        return (timeSeed + Math.floor(Math.random() * 100)) % predictions.length;
     }
 }
 
-// Остальной код остается без изменений
+// Функция для принудительного сброса ID (на случай проблем)
+function resetOracleId() {
+    localStorage.removeItem('universalOracleId');
+    sessionStorage.removeItem('sessionOracleId');
+    console.log('Oracle ID сброшен');
+    location.reload();
+}
+
+// Остальной код
 async function updatePrediction() {
     try {
         const today = new Date();
-        const predictionIndex = await getStablePredictionIndex(); // Используем новую функцию
+        const predictionIndex = await getUniversalPredictionIndex();
         
         document.getElementById('prediction').textContent = predictions[predictionIndex];
         document.getElementById('dateInfo').textContent = 
@@ -328,22 +340,29 @@ async function updatePrediction() {
     } catch (error) {
         console.error('Ошибка:', error);
         document.getElementById('prediction').innerHTML = 
-            '<span class="error-message">Магия временно недоступна</span>';
+            '<span class="error-message">Магия требует настройки</span>';
         document.getElementById('dateInfo').innerHTML =
-            '<span class="error-message">Опера слишком могущественна</span>';
+            '<span class="error-message">Обновите страницу</span>';
         document.getElementById('retryBtn').style.display = 'block';
     }
 }
 
-// Запускаем при загрузке
+// Запускаем
 document.addEventListener('DOMContentLoaded', function() {
-    setTimeout(updatePrediction, 1000);
+    // Добавляем кнопку сброса для отладки (можно убрать потом)
+    const resetBtn = document.createElement('button');
+    resetBtn.textContent = 'Сбросить магию';
+    resetBtn.style = 'background: #ff4444; color: white; border: none; padding: 5px 10px; border-radius: 5px; margin-top: 10px; font-size: 12px;';
+    resetBtn.onclick = resetOracleId;
+    document.querySelector('.oracle').appendChild(resetBtn);
+    
+    setTimeout(updatePrediction, 800);
 });
 
 document.getElementById('retryBtn').addEventListener('click', function() {
     this.style.display = 'none';
     document.getElementById('prediction').innerHTML = '<span class="loader"></span> Загрузка предсказания...';
     document.getElementById('dateInfo').textContent = '';
-    setTimeout(updatePrediction, 800);
+    setTimeout(updatePrediction, 600);
 });
 </script>
