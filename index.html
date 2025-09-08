@@ -238,7 +238,7 @@
             "В следующий раз, когда ты скажешь 'я готов', помни — магия любит посмеяться над твоими ожиданиями."
         ];
 
-       // УНИВЕРСАЛЬНЫЙ СТАБИЛЬНЫЙ ИДЕНТИФИКАТОР
+      // УНИВЕРСАЛЬНЫЙ СТАБИЛЬНЫЙ ИДЕНТИФИКАТОР
 function getUniversalStableId() {
     // Пробуем получить хоть что-то постоянное
     let stableId = localStorage.getItem('universalOracleId');
@@ -319,7 +319,13 @@ async function getUniversalPredictionIndex() {
     }
 }
 
-
+// Функция для принудительного сброса ID (на случай проблем)
+function resetOracleId() {
+    localStorage.removeItem('universalOracleId');
+    sessionStorage.removeItem('sessionOracleId');
+    console.log('Oracle ID сброшен');
+    location.reload();
+}
 
 // Остальной код
 async function updatePrediction() {
@@ -331,10 +337,27 @@ async function updatePrediction() {
         document.getElementById('dateInfo').textContent = 
             `Ваше персональное предсказание на ${today.toLocaleDateString()} • Действует до полуночи`;
             
-
+    } catch (error) {
+        console.error('Ошибка:', error);
+        document.getElementById('prediction').innerHTML = 
+            '<span class="error-message">Магия требует настройки</span>';
+        document.getElementById('dateInfo').innerHTML =
+            '<span class="error-message">Обновите страницу</span>';
+        document.getElementById('retryBtn').style.display = 'block';
+    }
 }
 
-
+// Запускаем
+document.addEventListener('DOMContentLoaded', function() {
+    // Добавляем кнопку сброса для отладки (можно убрать потом)
+    const resetBtn = document.createElement('button');
+    resetBtn.textContent = 'Сбросить магию';
+    resetBtn.style = 'background: #ff4444; color: white; border: none; padding: 5px 10px; border-radius: 5px; margin-top: 10px; font-size: 12px;';
+    resetBtn.onclick = resetOracleId;
+    document.querySelector('.oracle').appendChild(resetBtn);
+    
+    setTimeout(updatePrediction, 800);
+});
 
 document.getElementById('retryBtn').addEventListener('click', function() {
     this.style.display = 'none';
