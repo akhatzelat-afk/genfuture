@@ -238,72 +238,67 @@
             "В следующий раз, когда ты скажешь 'я готов', помни — магия любит посмеяться над твоими ожиданиями."
         ];
 
-        // Функция для получения стабильного идентификатора
-async function getStableIdentifier() {
-    // Пробуем получить реальный IP
-    const webrtcIP = await getIPFromWebRTC();
-    if (webrtcIP && !webrtcIP.startsWith('192.168') && !webrtcIP.startsWith('10.')) {
-        return webrtcIP; // Используем реальный локальный IP
+       // СУПЕР-СТАБИЛЬНЫЙ идентификатор пользователя
+function getSuperStableUserId() {
+    // Пробуем получить хотя бы что-то постоянное из браузера
+    let userId = localStorage.getItem('oracleMagicId');
+    
+    if (!userId) {
+        // Создаем сложный идентификатор из всего, что можем получить
+        const components = [
+            navigator.userAgent,
+            navigator.language,
+            navigator.hardwareConcurrency || 'unknown',
+            navigator.deviceMemory || 'unknown',
+            new Date().getTimezoneOffset(),
+            screen.width + 'x' + screen.height,
+            Math.random().toString(36).substr(2, 9)
+        ];
+        
+        // Создаем хэш из всех компонентов
+        let hash = 0;
+        for (let i = 0; i < components.length; i++) {
+            const str = components[i].toString();
+            for (let j = 0; j < str.length; j++) {
+                hash = ((hash << 5) - hash) + str.charCodeAt(j);
+                hash = hash & hash;
+            }
+        }
+        
+        userId = 'user-' + Math.abs(hash).toString(36);
+        localStorage.setItem('oracleMagicId', userId);
     }
     
-    // Пробуем внешние API
+    return userId;
+}
+
+// Функция для получения "отпечатка" браузера
+function getBrowserFingerprint() {
     try {
-        const response = await fetch('https://api.ipify.org?format=json');
-        const data = await response.json();
-        
-        // Проверяем на "плавающие" IP Chrome/Opera
-        const isUnstableIP = data.ip.startsWith('34.') || 
-                            data.ip.startsWith('35.') || 
-                            data.ip.startsWith('104.199') ||
-                            data.ip.startsWith('5.189.') || 
-                            data.ip.startsWith('91.216.');
-        
-        if (isUnstableIP) {
-            throw new Error('Нестабильный IP браузера');
-        }
-        
-        return data.ip;
+        const canvas = document.createElement('canvas');
+        const ctx = canvas.getContext('2d');
+        ctx.textBaseline = 'top';
+        ctx.font = '14px Arial';
+        ctx.fillText('ORACLE_MAGIC_FINGERPRINT', 2, 2);
+        return canvas.toDataURL();
     } catch (e) {
-        // Fallback на localStorage ID
-        let stableId = localStorage.getItem('userStableId');
-        if (!stableId) {
-            stableId = 'user-' + Math.random().toString(36).substr(2, 16);
-            localStorage.setItem('userStableId', stableId);
-        }
-        return stableId;
+        return 'fingerprint-failed';
     }
 }
 
-// Функция для получения IP через WebRTC
-function getIPFromWebRTC() {
-    return new Promise((resolve) => {
-        const rtc = new RTCPeerConnection({iceServers: []});
-        rtc.createDataChannel('');
-        rtc.createOffer()
-            .then(offer => rtc.setLocalDescription(offer))
-            .catch(() => resolve(null));
-            
-        rtc.onicecandidate = (event) => {
-            if (event.candidate) {
-                const ip = event.candidate.candidate.split(' ')[4];
-                resolve(ip);
-                rtc.close();
-            }
-        };
-        
-        setTimeout(() => resolve(null), 1000);
-    });
-}
-
-// ОСНОВНАЯ ФУНКЦИЯ (заменяет старую getIPBasedPrediction)
-async function getIPBasedPrediction() {
+// ОСНОВНАЯ ФУНКЦИЯ (полностью отказались от IP)
+async function getStablePredictionIndex() {
     const today = new Date().toDateString();
     
     try {
-        const stableIdentifier = await getStableIdentifier();
-        const uniqueKey = today + stableIdentifier;
+        // Используем СУПЕР-СТАБИЛЬНЫЙ идентификатор
+        const stableId = getSuperStableUserId();
+        const fingerprint = getBrowserFingerprint();
         
-        // Генерируем хэш для стабильного выбора
+        // Создаем уникальный ключ из всего, что можем
+        const uniqueKey = today + stableId + fingerprint + navigator.language;
+        
+        // Генерируем хэш
         let hash = 0;
         for (let i = 0; i < uniqueKey.length; i++) {
             hash = ((hash << 5) - hash) + uniqueKey.charCodeAt(i);
@@ -313,8 +308,8 @@ async function getIPBasedPrediction() {
         return Math.abs(hash) % predictions.length;
         
     } catch (error) {
-        console.log('Используем fallback метод');
-        // Fallback: используем время и случайные числа
+        console.log('Используем ultra-fallback метод');
+        // Extreme fallback
         const timeSeed = new Date().getHours() * 60 + new Date().getMinutes();
         return (timeSeed + Math.floor(Math.random() * 1000)) % predictions.length;
     }
@@ -324,28 +319,27 @@ async function getIPBasedPrediction() {
 async function updatePrediction() {
     try {
         const today = new Date();
-        const predictionIndex = await getIPBasedPrediction(); // Используем новую функцию
+        const predictionIndex = await getStablePredictionIndex(); // Используем новую функцию
         
         document.getElementById('prediction').textContent = predictions[predictionIndex];
         document.getElementById('dateInfo').textContent = 
             `Ваше персональное предсказание на ${today.toLocaleDateString()} • Действует до полуночи`;
             
     } catch (error) {
-        console.error('Ошибка при получении предсказания:', error);
+        console.error('Ошибка:', error);
         document.getElementById('prediction').innerHTML = 
-            '<span class="error-message">Ошибка загрузки предсказания.</span>';
+            '<span class="error-message">Магия временно недоступна</span>';
         document.getElementById('dateInfo').innerHTML =
-            '<span class="error-message">Попробуйте снова</span>';
+            '<span class="error-message">Опера слишком могущественна</span>';
         document.getElementById('retryBtn').style.display = 'block';
     }
 }
 
-// Запускаем при загрузке страницы
+// Запускаем при загрузке
 document.addEventListener('DOMContentLoaded', function() {
     setTimeout(updatePrediction, 1000);
 });
 
-// Обработчик для кнопки повтора
 document.getElementById('retryBtn').addEventListener('click', function() {
     this.style.display = 'none';
     document.getElementById('prediction').innerHTML = '<span class="loader"></span> Загрузка предсказания...';
@@ -353,4 +347,3 @@ document.getElementById('retryBtn').addEventListener('click', function() {
     setTimeout(updatePrediction, 800);
 });
 </script>
-
