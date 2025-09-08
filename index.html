@@ -347,17 +347,7 @@ async function updatePrediction() {
     }
 }
 
-// Запускаем
-document.addEventListener('DOMContentLoaded', function() {
-    // Добавляем кнопку сброса для отладки (можно убрать потом)
-    const resetBtn = document.createElement('button');
-    resetBtn.textContent = 'Сбросить магию';
-    resetBtn.style = 'background: #ff4444; color: white; border: none; padding: 5px 10px; border-radius: 5px; margin-top: 10px; font-size: 12px;';
-    resetBtn.onclick = resetOracleId;
-    document.querySelector('.oracle').appendChild(resetBtn);
-    
-    setTimeout(updatePrediction, 800);
-});
+
 
 document.getElementById('retryBtn').addEventListener('click', function() {
     this.style.display = 'none';
@@ -366,3 +356,4 @@ document.getElementById('retryBtn').addEventListener('click', function() {
     setTimeout(updatePrediction, 600);
 });
 </script>
+
