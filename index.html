@@ -319,13 +319,7 @@ async function getUniversalPredictionIndex() {
     }
 }
 
-// Функция для принудительного сброса ID (на случай проблем)
-function resetOracleId() {
-    localStorage.removeItem('universalOracleId');
-    sessionStorage.removeItem('sessionOracleId');
-    console.log('Oracle ID сброшен');
-    location.reload();
-}
+
 
 // Остальной код
 async function updatePrediction() {
@@ -337,14 +331,7 @@ async function updatePrediction() {
         document.getElementById('dateInfo').textContent = 
             `Ваше персональное предсказание на ${today.toLocaleDateString()} • Действует до полуночи`;
             
-    } catch (error) {
-        console.error('Ошибка:', error);
-        document.getElementById('prediction').innerHTML = 
-            '<span class="error-message">Магия требует настройки</span>';
-        document.getElementById('dateInfo').innerHTML =
-            '<span class="error-message">Обновите страницу</span>';
-        document.getElementById('retryBtn').style.display = 'block';
-    }
+
 }
 
 
@@ -356,4 +343,5 @@ document.getElementById('retryBtn').addEventListener('click', function() {
     setTimeout(updatePrediction, 600);
 });
 </script>
+
 
