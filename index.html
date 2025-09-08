@@ -238,9 +238,8 @@
             "В следующий раз, когда ты скажешь 'я готов', помни — магия любит посмеяться над твоими ожиданиями."
         ];
 
-      // УНИВЕРСАЛЬНЫЙ СТАБИЛЬНЫЙ ИДЕНТИФИКАТОР
+    // УНИВЕРСАЛЬНЫЙ СТАБИЛЬНЫЙ ИДЕНТИФИКАТОР
 function getUniversalStableId() {
-    // Пробуем получить хоть что-то постоянное
     let stableId = localStorage.getItem('universalOracleId');
     
     if (!stableId) {
@@ -267,9 +266,6 @@ function getUniversalStableId() {
         
         stableId = 'magic-user-' + Math.abs(hash).toString(36);
         localStorage.setItem('universalOracleId', stableId);
-        
-        // Дублируем в sessionStorage на всякий случай
-        sessionStorage.setItem('sessionOracleId', stableId);
     }
     
     return stableId;
@@ -290,11 +286,6 @@ function getBrowserType() {
 async function getUniversalPredictionIndex() {
     const today = new Date().toDateString();
     const browserType = getBrowserType();
-    
-    // Для особых случаев
-    if (browserType === 'opera' || browserType === 'firefox') {
-        console.log('Обнаружен приватный браузер:', browserType);
-    }
     
     try {
         // Всегда используем наш универсальный ID
@@ -319,14 +310,6 @@ async function getUniversalPredictionIndex() {
     }
 }
 
-// Функция для принудительного сброса ID (на случай проблем)
-function resetOracleId() {
-    localStorage.removeItem('universalOracleId');
-    sessionStorage.removeItem('sessionOracleId');
-    console.log('Oracle ID сброшен');
-    location.reload();
-}
-
 // Остальной код
 async function updatePrediction() {
     try {
@@ -349,13 +332,6 @@ async function updatePrediction() {
 
 // Запускаем
 document.addEventListener('DOMContentLoaded', function() {
-    // Добавляем кнопку сброса для отладки (можно убрать потом)
-    const resetBtn = document.createElement('button');
-    resetBtn.textContent = 'Сбросить магию';
-    resetBtn.style = 'background: #ff4444; color: white; border: none; padding: 5px 10px; border-radius: 5px; margin-top: 10px; font-size: 12px;';
-    resetBtn.onclick = resetOracleId;
-    document.querySelector('.oracle').appendChild(resetBtn);
-    
     setTimeout(updatePrediction, 800);
 });
 
@@ -366,5 +342,4 @@ document.getElementById('retryBtn').addEventListener('click', function() {
     setTimeout(updatePrediction, 600);
 });
 </script>
-
 
